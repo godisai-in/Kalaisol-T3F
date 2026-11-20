@@ -60,6 +60,10 @@ The scheduled backup replaces the cron line in the README. Use one or the other.
    sudo docker compose exec web python manage.py build_embeddings
    ```
 
+   The image only has what the website needs (about 420 MB). `import_wiktionary` and `build_embeddings`
+   work in it. `import_english`, `machine_draft`, `export_dataset` and `push_hf` need the data tools: run them
+   on a machine with `uv sync`, or build a full image with `--build-arg UV_GROUPS=--all-groups`.
+
    `data_raw/` isn't in git (it's large). Copy what you need to `/opt/kalaichol/data_raw/` with `rsync`
    first; it's mounted into the container.
 

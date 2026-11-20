@@ -5,14 +5,22 @@ synonyms/antonyms and meaning-based (vector) search. Theme follows Mozhi (kumkum
 
 ## Setup
 
+Dependencies are managed with [uv](https://docs.astral.sh/uv/) (`pyproject.toml` + `uv.lock`, Python 3.11).
+
 ```bash
-uv venv .venv && uv pip install --python .venv/bin/python "django>=5.1,<5.2" "django-allauth[socialaccount]" numpy fastembed
-.venv/bin/python manage.py migrate
-.venv/bin/python manage.py import_wiktionary data_raw/tamil.jsonl   # seed terms, Tamil words, syn/ant
-.venv/bin/python manage.py build_embeddings                          # vector index (downloads ~220 MB model once)
-.venv/bin/python manage.py createsuperuser                           # for /admin (moderation)
-.venv/bin/python manage.py runserver
+uv sync                                                              # creates .venv from uv.lock
+uv run python manage.py migrate
+uv run python manage.py import_wiktionary data_raw/tamil.jsonl       # seed terms, Tamil words, syn/ant
+uv run python manage.py build_embeddings                             # vector index (downloads ~220 MB model once)
+uv run python manage.py createsuperuser                              # for /admin (moderation)
+uv run python manage.py runserver
 ```
+
+Website dependencies are in `dependencies`. The data tools (NLLB, NLTK, pyarrow, Hugging Face) are in the
+`data` group, which local `uv sync` installs but the Docker image leaves out.
+Add a dependency with `uv add <package>` (or `uv add --group data <package>`) (updates `pyproject.toml` and `uv.lock`; commit both).
+After changing either file by hand, run `uv lock`. CI and the Docker build use `--locked` and fail if
+the lockfile is out of date.
 
 ## Accounts, verification and review
 
