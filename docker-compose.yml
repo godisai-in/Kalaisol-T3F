@@ -12,7 +12,7 @@ name: kalaichol
 
 services:
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: kalaichol

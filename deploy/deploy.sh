@@ -51,9 +51,12 @@ wait_for_web() {
     # The entrypoint runs migrations before gunicorn starts; wait until they are applied and the site answers.
     PORT=$(sed -n 's/^WEB_PORT=//p' .env | tail -1)
     PORT="${PORT:-8081}"
+    # Django answers 400 to a Host it doesn't know, so ask as the first name in ALLOWED_HOSTS.
+    SITE_HOST=$(sed -n 's/^ALLOWED_HOSTS=//p' .env | tail -1 | cut -d, -f1 | tr -d "\"' " | sed 's/^\.//')
+    case "$SITE_HOST" in ''|'*') SITE_HOST=localhost ;; esac
     for _ in $(seq 1 90); do
         if docker compose exec -T web python manage.py migrate --check >/dev/null 2>&1 \
-           && curl -fsS -o /dev/null "http://127.0.0.1:$PORT/"; then
+           && curl -fsS -o /dev/null -H "Host: $SITE_HOST" "http://127.0.0.1:$PORT/"; then
             echo "Site answers on 127.0.0.1:$PORT."
             return 0
         fi
